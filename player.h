@@ -51,7 +51,7 @@ public:
             shieldTimer += DeltaTime;
             if (shieldTimer >= shieldDuration) {
                 hasShield = false;
-                shieldTimer = 0.0;
+                shieldTimer = 0.0f;
             }
         }
 
@@ -69,7 +69,7 @@ public:
         SetPosition(pos);
     }
 
-    void SetInvulnerable(bool invul, float duration = 1.0) {
+    void SetInvulnerable(bool invul, float duration = 1.0f) {
         if (invul) {
             hasShield = true;
             shieldDuration = duration;
@@ -138,7 +138,8 @@ public:
         if (health > 100) health = 100;
     }
 
-    void AddScore(int points) {
+    void AddScore(int points)
+    {
         score += points;
     }
 
@@ -187,5 +188,20 @@ public:
         invulnerabilityTimer = 0.0;
         hasShield = false;
         shieldTimer = 0.0;
+    }
+    void SetHealth(int hp) { health = hp; }
+    void SetScore(int s) { score = s; }
+    void SetLives(int l) { lives = l; }
+    void SetInvulnerabilityState(bool invul, float timer) {
+        isInvulnerable = invul;
+        invulnerabilityTimer = timer;
+    }
+    void SetShieldState(bool shield, float timer) {
+        hasShield = shield;
+        shieldTimer = timer;
+    }
+    bool IsInvulnerable()
+    {
+        return isInvulnerable;
     }
 };
