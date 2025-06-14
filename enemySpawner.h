@@ -94,8 +94,6 @@ public:
             enemies.push(newEnemy);
         }
     }
-
-
     void NextWave()
     {
         waveNumber++;
@@ -126,4 +124,32 @@ public:
     {
         return waveNumber;
     }
+    void SetWaveNumber(int wave) { waveNumber = wave; }
+    void SetDifficultyScaling(float scaling) { difficultyScaling = scaling; }
+    void SetSpawnTimers(float timer1, float timer2, float timer3) {
+        enemy_1_SpawnTimer = timer1;
+        enemy_2_SpawnTimer = timer2;
+        enemy_3_SpawnTimer = timer3;
+    }
+    void SetSpawnIntervals(float interval1, float interval2, float interval3) {
+        enemy_1_SpawnInterval = interval1;
+        enemy_2_SpawnInterval = interval2;
+        enemy_3_SpawnInterval = interval3;
+    }
+    void GetSpawnTimers(float& timer1, float& timer2, float& timer3) const {
+        timer1 = enemy_1_SpawnTimer;
+        timer2 = enemy_2_SpawnTimer;
+        timer3 = enemy_3_SpawnTimer;
+    }
+
+    void GetSpawnIntervals(float& interval1, float& interval2, float& interval3) const {
+        interval1 = enemy_1_SpawnInterval;
+        interval2 = enemy_2_SpawnInterval;
+        interval3 = enemy_3_SpawnInterval;
+    }
+    float GetDifficultyScaling()
+    {
+        return difficultyScaling;
+    }
+
 };
