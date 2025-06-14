@@ -1,8 +1,8 @@
 #pragma once
 
-class GameManager
-{
+class GameManager {
 private:
+
     enum GameState;//forward declaration
     player* mainPlayer;
     Dynamic_array<enemy> enemies;
@@ -12,10 +12,8 @@ private:
 
     GameState currentState;
     float gameTimer;
-    float enemyShootTimer;
 
-    Texture2D explosionTexture;
-    Texture2D enemyBulletTexture;
+    float enemyShootTimer;
 
 public:
     enum GameState {
@@ -39,8 +37,10 @@ public:
                 currentState = GAME_OVER;
             }
 
+            // Update bullets
             UpdateBullets(dt);
 
+            // Update enemies
             UpdateEnemies(dt);
 
             // Enemy shooting logic
@@ -50,14 +50,12 @@ public:
             }
 
             // Update explosions
-            for (int i = 0; i < explosions.size(); i++)
-            {
+            for (int i = 0; i < explosions.size(); i++) {
                 explosions[i].Update(dt);
             }
 
             // Clean up inactive explosions
-            for (int i = 0; i < explosions.size(); )
-            {
+            for (int i = 0; i < explosions.size(); ) {
                 if (!explosions[i].IsActive()) {
                     explosions.delete_at(i);
                 }
@@ -76,7 +74,8 @@ public:
             if (playerBullets[i].IsOffScreen()) {
                 playerBullets.delete_at(i);
             }
-            else {
+            else
+            {
                 i++;
             }
         }
@@ -99,13 +98,13 @@ public:
             enemies[i].Update(dt);
 
             if (enemies[i].GetHealth() <= 0) {
-
+                // Create explosion at enemy position
                 AddExplosion(enemies[i].GetPosition());
-
-                if (mainPlayer) {
+                // Add score to player
+                if (mainPlayer)
+                {
                     mainPlayer->AddScore(enemies[i].GetScoreValue());
                 }
-
                 enemies.delete_at(i);
             }
             else if (enemies[i].IsOffScreen()) {
@@ -119,7 +118,7 @@ public:
 
     void TryEnemyShoot() {
         for (int i = 0; i < enemies.size(); i++) {
-            if (enemies[i].CanShoot() && GetRandomValue(0, 100) < 80) { // 80% chance to shoot
+            if (enemies[i].CanShoot() && GetRandomValue(0, 100) < 20) { // 20% chance to shoot
                 Vector2 bulletPos = enemies[i].GetPosition();
                 bulletPos.y += enemies[i].GetTexture().height;
                 Vector2 velocity = { 0, 250 }; // Slower than player bullets
@@ -129,7 +128,8 @@ public:
             }
         }
     }
-
+    void SetGameTimer(float timer) { gameTimer = timer; }
+    float GetGameTimer() const { return gameTimer; }
     void Draw() {
         if (currentState == MAIN_MENU) {
             DrawMainMenu();
@@ -202,15 +202,17 @@ public:
     void StartGame() {
         ClearAll();
         if (mainPlayer) {
-            Vector2 startPos = { GetScreenWidth() / 2.0f - mainPlayer->GetTexture().width / 2.0f,
+            Vector2 startPos = { GetScreenWidth() / 2.0 - mainPlayer->GetTexture().width / 2.0,
                                 GetScreenHeight() - mainPlayer->GetTexture().height - 10 };
             mainPlayer->ResetGame();
             mainPlayer->SetPosition(startPos);
         }
         currentState = PLAYING;
-        gameTimer = 0.0f;
+        gameTimer = 0.0;
     }
 
+    Texture2D explosionTexture;
+    Texture2D enemyBulletTexture;
 
     void SetExplosionTexture(Texture2D tex) {
         explosionTexture = tex;
@@ -229,7 +231,8 @@ public:
     Dynamic_array<bullet>& GetEnemyBullets() { return enemyBullets; }
 
     // Check collisions between game objects
-    void CheckCollisions() {
+    void CheckCollisions()
+    {
         if (!mainPlayer || !mainPlayer->IsAlive()) return;
 
         // Player bullets vs enemies
@@ -255,11 +258,11 @@ public:
             }
         }
 
-        // collision damage
+        //collision damage
         for (int i = 0; i < enemies.size(); i++) {
             if (CheckCollisionRecs(enemies[i].GetBounds(), mainPlayer->GetBounds())) {
-                mainPlayer->TakeDamage(25); // Collision damage
-                enemies[i].TakeDamage(50);  // Enemy also takes damage from collision
+                mainPlayer->TakeDamage(25);
+                enemies[i].TakeDamage(50);
                 AddExplosion(enemies[i].GetPosition());
             }
         }
@@ -295,8 +298,9 @@ public:
         int screenHeight = GetScreenHeight();
 
         DrawText("SPACE SHOOTER", screenWidth / 2 - 150, screenHeight / 3, 40, WHITE);
-        DrawText("Press ENTER to Start", screenWidth / 2 - 120, screenHeight / 2, 20, GREEN);
-        DrawText("Press ESC to Quit", screenWidth / 2 - 100, screenHeight / 2 + 40, 20, RED);
+        DrawText("Press ENTER to Start New Game", screenWidth / 2 - 150, screenHeight / 2 - 20, 20, GREEN);
+        DrawText("Press L to Load Game", screenWidth / 2 - 120, screenHeight / 2 + 20, 20, YELLOW);
+        DrawText("Press ESC to Quit", screenWidth / 2 - 100, screenHeight / 2 + 60, 20, RED);
     }
 
     void DrawPauseScreen() {
@@ -304,9 +308,10 @@ public:
         int screenHeight = GetScreenHeight();
 
         DrawRectangle(0, 0, screenWidth, screenHeight, Fade(BLACK, 0.7f));
-        DrawText("GAME PAUSED", screenWidth / 2 - 120, screenHeight / 2 - 40, 40, WHITE);
-        DrawText("Press P to Resume", screenWidth / 2 - 100, screenHeight / 2 + 20, 20, GREEN);
-        DrawText("Press ESC to Quit", screenWidth / 2 - 100, screenHeight / 2 + 60, 20, RED);
+        DrawText("GAME PAUSED", screenWidth / 2 - 120, screenHeight / 2 - 60, 40, WHITE);
+        DrawText("Press P to Resume", screenWidth / 2 - 100, screenHeight / 2, 20, GREEN);
+        DrawText("Press S to Save Game", screenWidth / 2 - 100, screenHeight / 2 + 40, 20, YELLOW);
+        DrawText("Press ESC to Quit", screenWidth / 2 - 100, screenHeight / 2 + 80, 20, RED);
     }
 
     void DrawGameOverScreen() {
@@ -343,4 +348,3 @@ public:
         DrawText("Press ESC to Quit", screenWidth / 2 - 100, screenHeight / 2 + 80, 20, RED);
     }
 };
-
