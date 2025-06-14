@@ -21,11 +21,13 @@ using namespace std;
 #include "saveLoadManager.h"
 
 int main() {
+    // Initialize window
     const int screenWidth = 1920;
     const int screenHeight = 1020;
     InitWindow(screenWidth, screenHeight, "Space Shooter");
     SetTargetFPS(60);
 
+    // Load textures
     Texture2D playerTexture = LoadTexture("player.png");
     Texture2D enemy1 = LoadTexture("enemy1.png");
     Texture2D enemy2 = LoadTexture("enemy2.png");
@@ -35,14 +37,17 @@ int main() {
     Texture2D explosionTexture = LoadTexture("explosion.png");
     Texture2D backgroundTexture = LoadTexture("background.png");
 
+    // Load power-up textures
     Texture2D healthPowerupTexture = LoadTexture("health_powerup.png");
     Texture2D shieldPowerupTexture = LoadTexture("shield_powerup.png");
     Texture2D rapidFirePowerupTexture = LoadTexture("rapid_fire_powerup.png");
     Texture2D extraLifePowerupTexture = LoadTexture("extra_life_powerup.png");
 
+    // Create player
     Vector2 playerStartPos = { (float)screenWidth / 2 - playerTexture.width / 2,(float)screenHeight - playerTexture.height - 20 };
     player mainPlayer(playerStartPos, playerTexture);
 
+    // Create game systems
     GameManager gameManager(&mainPlayer);
 
     gameManager.SetExplosionTexture(explosionTexture);
@@ -66,14 +71,18 @@ int main() {
 
     Background background(backgroundTexture, 50.0);
 
+    // Start background music
     audioManager.StartBackgroundMusic();
     audioManager.SetGameMusicVolume(0.3);
     audioManager.SetGameSoundVolume(0.5);
 
     SaveLoadManager saveManager;
 
+    // Game loop
     while (!WindowShouldClose()) {
         float deltaTime = GetFrameTime();
+
+        // Update music
         audioManager.UpdateMusic();
 
         // Process input
@@ -111,6 +120,7 @@ int main() {
                 audioManager.PlayShootSound();
             }
 
+            // Wave progression logic (keep existing code)
             if (mainPlayer.GetScore() >= 2000 && enemySpawner.GetWaveNumber() == 1) {
                 enemySpawner.NextWave();
             }
@@ -146,33 +156,50 @@ int main() {
         }
         // Update game logic
         if (gameManager.GetGameState() == GameManager::PLAYING) {
+            // Update background
             background.Update(deltaTime);
+            // Update game objects
             gameManager.Update(deltaTime);
+            // Spawn enemies
             enemySpawner.Update(deltaTime, gameManager.GetEnemies());
+            // Update power-ups
             powerupManager.Update(deltaTime, mainPlayer);
             // Check for enemy deaths and spawn power-ups
-            for (int i = 0; i < gameManager.GetEnemies().size(); i++)
-                {
-                if (gameManager.GetEnemies()[i].GetHealth() <= 0) 
-                {
+            for (int i = 0; i < gameManager.GetEnemies().size(); i++) {
+                if (gameManager.GetEnemies()[i].GetHealth() <= 0) {
+                    // Chance to spawn a power-up where the enemy died
                     powerupManager.SpawnPowerUpAtPosition(gameManager.GetEnemies()[i].GetPosition());
                 }
             }
+
             gameManager.CheckCollisions();
-            if (enemySpawner.GetWaveNumber() >= 3)
+
+            // Check for level completion
+
+            if (enemySpawner.GetWaveNumber() > 3)
             {
                 gameManager.SetGameState(GameManager::VICTORY);
             }
         }
 
+        // Drawing
         BeginDrawing();
         ClearBackground(BLACK);
+        // Draw background
         background.Draw();
+
+        // Draw game objects
         gameManager.Draw();
+
+        // Draw power-ups
         powerupManager.Draw();
+
+        // Draw HUD
         if (gameManager.GetGameState() == GameManager::PLAYING)
         {
             gameManager.DrawHUD();
+
+            // Draw wave number
             char waveText[20];
             sprintf_s(waveText, "WAVE: %d", enemySpawner.GetWaveNumber());
             DrawText(waveText, GetScreenWidth() - 200, 50, 20, WHITE);
